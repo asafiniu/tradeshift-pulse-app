@@ -24,11 +24,11 @@ function PixiService() {
 	// console.log(JSON.stringify(locations, null, '\t'));
 
 	function getRandomLocationNamePair() {
-		const firstIndex = getRandomInt(0, locationNames.length);
+		const firstIndex = getRandomInt(0, locationNames.length - 1);
 		const firstName = locationNames[firstIndex];
 		const otherNames = _.omit(locationNames, firstName);
 		// console.log('otherNames', otherNames);
-		const secondIndex = getRandomInt(0, locationNames.length - 1);
+		const secondIndex = getRandomInt(0, locationNames.length - 2);
 		const secondName = otherNames[secondIndex];
 		const result = { firstName, secondName };
 		// console.log(JSON.stringify(result, null, '\t'));
@@ -43,8 +43,9 @@ function PixiService() {
 		}, {});
 	}
 	
-	const events = _.reduce(_.range(100), (data, value) => {
-		const gap = getRandomInt(0, 5);
+	const events = _.reduce(_.range(200), (data, value) => {
+		const gap = getRandomInt(0, 1);
+		console.log('gap=', gap);
 		let nextMoment = _.isNil(data.lastMoment) ? moment() : moment(data.lastMoment);
 		nextMoment = nextMoment.add(gap, 'seconds');
 		const locationPair = getRandomLocationNamePair();
@@ -63,19 +64,19 @@ function PixiService() {
 		// console.log('sourceLocationName', sourceLocationName, 'targetLocationName', targetLocationName);
 		const srcPoint = locations[sourceLocationName];
 		const dstPoint = locations[targetLocationName];
-		// console.log(JSON.stringify(srcLoc, null, '\t'));
-		// console.log(JSON.stringify(dstLoc, null, '\t'));
+		console.log('srcPoint', JSON.stringify(srcPoint, null, '\t'));
+		console.log('dstPoint', JSON.stringify(dstPoint, null, '\t'));
 		const connection = new Connection({ srcPoint, dstPoint, timestamp });
 		connections.push(connection);
 	});
 
 	function mainLoop() {
-		const currentMoment = moment().valueOf();
+		const currentTimestamp = moment().valueOf();
 		_.each(connections, (connection) => {
 			// console.log('connection.getTimestamp()', connection.getTimestamp());
 			// console.log('connection.isOnStage()', connection.isOnStage());
 			// console.log('connection.isOlderThan(currentMoment)', connection.isOlderThan(currentMoment));
-			if ((connection.isOlderThan(currentMoment)) && (!connection.isOnStage()) && (!connection.isComplete())) {
+			if ((connection.isOlderThan(currentTimestamp)) && (!connection.isOnStage()) && (!connection.isComplete())) {
 				connection.addToStage(stage);
 			}
 			if (connection.isOnStage()) {
@@ -91,9 +92,8 @@ function PixiService() {
 	}
 
 	function getRandomInt(min, max) {
-		min = Math.ceil(min);
-		max = Math.floor(max);
-		return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+		const int = Math.floor(Math.random() * (max - min + 1)) + min;
+		return int;
 	}
 
 	function getRandomPoint() {
