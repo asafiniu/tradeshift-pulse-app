@@ -1,6 +1,18 @@
 body {
 	margin: 0 auto;
 	background-color: #000;
+	font-family: "Open Sans",Helvetica,Arial,sans-serif;
+	overflow: hidden;
+}
+
+.logo {
+	background: url(images/tslogowhite.png) no-repeat;
+	display: block;
+	width: 170px;
+	position: absolute;
+	top: 30px;
+	background-size: 100%;
+	height: 35px;
 }
 
 #map {
@@ -10,9 +22,44 @@ body {
 	background-size: 1280px 800px;
 }
 
-#odometer {
-	color: #fff;
+#text {
+	color: rgba(255,255,255,0.5);
 	position: absolute;
-	top: 0;
-	left: 0;
+	background: rgba(0,0,0,0.6);
+	margin: -430px 0
+}
+
+#text h1, #text h3 {
+	font-weight: lighter;
+	color: #fff;
+}
+
+#text h1 {
+	font-size: 72px;
+	margin: 0;
+	line-height: 72px;
+	margin-bottom: -15px
+}
+
+#text div {
+	padding: 2px;
+	font-weight: 100;
+	font-size: 14px;
+}
+
+#text #time, #text #odometer {
+	font-size: 34px;
+	padding:0;
+}
+
+#text .blue, #text .grey {
+	margin: 0;
+}
+
+#text .blue {
+	color: #00b0ff
+}
+
+#text .grey {
+	color: grey
 }

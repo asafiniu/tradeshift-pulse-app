@@ -5,8 +5,8 @@ const moment = require('moment');
 const Connection = require('../models/Connection');
 const MAP_WIDTH = 1280;
 const MAP_HEIGHT = 800;
-const VOLUME_MIN = 3;
-const VOLUME_MAX = 15;
+const VOLUME_MIN = 10;
+const VOLUME_MAX = 20;
 
 function PixiService() {
 	const stage = new PIXI.Stage(0x000000);
@@ -211,8 +211,8 @@ function PixiService() {
 	};
 
 	function eventToPixiEvent(event, timestamp) {
-		// const volume = awesome(event.volume);
-		const volume = getRandomVolume();
+		const volume = awesome(event.volume);
+		// const volume = getRandomVolume();
 		const source = countryToPixiCountry(event.source);
 		const dest =  countryToPixiCountry(event.dest);
 		return { source, dest, volume, timestamp };
@@ -290,9 +290,9 @@ function PixiService() {
 
 	// addMockEvents();
 
-	setInterval(() => {
-		addMockEvents();
-	}, 5000);
+	// setInterval(() => {
+	// 	addMockEvents();
+	// }, 5000);
 
 	return service;
 }
