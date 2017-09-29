@@ -165,25 +165,55 @@ function PixiService() {
 	}
 
 	function countryToPixiCountry(country) {
-		const point = getRandomPoint();
+		// const point = getRandomPoint();
+		// const point = convertGeopointToImgCoordinates1(country.lat, country.lon);
+		const point = convertGeopointToImgCoordinates(country.lat, country.lon);
+		// console.log('point', JSON.stringify(point, null, '\t'));
 		return {
 			iso: country.iso,
 			lat: country.lat,
 			lon: country.lon,
-			// x: ((MAP_WIDTH / 360) * (180 + parseFloat(country.lon))),
-			// y: ((MAP_HEIGHT / 180) * (90 - parseFloat(country.lat)))
 			x: point.x,
 			y: point.y,
 		};
 	};
 
+	function convertGeopointToImgCoordinates(latitude, longitude) {
+		// get x value
+		latitude = Number(latitude);
+		longitude = Number(longitude);
+		const xNumber = (longitude + 180) * (Number(MAP_WIDTH) / Number(360));
+		
+		// convert from degrees to radians
+		const latRad = latitude * Math.PI / Number(180);
+	
+		// get y value
+		const mercN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
+		const yNumber = (Number(MAP_HEIGHT) / 2) - (Number(MAP_WIDTH) * mercN / (2 * Math.PI));
+		
+		const SCALE = 0.82; 
+		const X_OFFSET = 85;
+		const Y_OFFSET = 140;
+
+		const xScaled = (xNumber * SCALE) + X_OFFSET;
+		const yScaled = (yNumber * SCALE) + Y_OFFSET;
+
+		const x = Math.round(xScaled);
+		const y = Math.round(yScaled);
+
+		return { x, y };
+	}
+
+	function awesome(volume) {
+		return Math.max(VALUE_MIN, Math.min(VALUE_MAX, Math.ceil(Math.log10(volume))))
+	};
+
 	function eventToPixiEvent(event, timestamp) {
-		return {
-			source: countryToPixiCountry(event.source),
-			dest: countryToPixiCountry(event.dest),
-			volume: getRandomVolume(),
-			timestamp,
-		};
+		// const volume = awesome(event.volume);
+		const volume = getRandomVolume();
+		const source = countryToPixiCountry(event.source);
+		const dest =  countryToPixiCountry(event.dest);
+		return { source, dest, volume, timestamp };
 	};
 
 	function getRandomVolume() {
@@ -205,38 +235,58 @@ function PixiService() {
 		// console.log('pixiEvents', JSON.stringify(pixiEvents, null, '\t'));
 		// console.log('pixiEvents.length', pixiEvents.length);
 		addConnections(pixiEvents);
-		console.log('connections.length', connections.length);
+		// console.log('connections.length', connections.length);
 		// TODO: display events on PixiJS (asaf/jim)
 		return pixiEvents;
 	};
 
 	function addMockEvents() {
-		const events = _.reduce(_.range(200), (data) => {
+		const events = _.reduce(_.range(10), (data) => {
 			return _.union(data, [
-				{
-					source: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
-					dest: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
-					volume: 12305918750980980,
-				},
 				// {
 				// 	source: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
 				// 	dest: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
-				// 	volume: 12305918750980980
-				// }, {
-				// 	source: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
-				// 	dest: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
-				// 	volume: 233235325
-				// }, {
-				// 	source: {iso: 'CH', lat: '46.818188', lon: '8.227512'},
-				// 	dest: {iso: 'CL', lat: '-35.675147', lon: '-71.542969'},
+				// 	volume: 12305918750980980,
+				// },
+				{
+					source: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
+					dest: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
+					volume: 12305918750980980
+				}, {
+					source: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
+					dest: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
+					volume: 233235325
+				}, {
+					source: {iso: 'CH', lat: '46.818188', lon: '8.227512'},
+					dest: {iso: 'CL', lat: '-35.675147', lon: '-71.542969'},
+					volume: 123452312321111114434346789
+				}
+				// {
+				// 	source: {iso: 'London', lat: '51.509865', lon: '-0.118092'},
+				// 	dest: {iso: 'PT', lat: '38.736946', lon: '-9.142685'},
 				// 	volume: 123452312321111114434346789
-				// }
+				// },
+				// {
+				// 	source: {iso: 'Santa Cruz', lat: '36.974117', lon: '-122.030792'},
+				// 	dest: {iso: 'PT', lat: '38.736946', lon: '-9.142685'},
+				// 	volume: 123452312321111114434346789
+				// },
+				// {
+				// 	source: {iso: 'Tokyo', lat: '35.652832', lon: '139.839478'},
+				// 	dest: {iso: 'PT', lat: '38.736946', lon: '-9.142685'},
+				// 	volume: 123452312321111114434346789
+				// },
+				// {
+				// 	source: {iso: 'Tokyo', lat: '-21.000000', lon: '48.150002'},
+				// 	dest: {iso: 'PT', lat: '38.736946', lon: '-9.142685'},
+				// 	volume: 123452312321111114434346789
+				// },
 			]);
 		}, []);
 		service.publish(events);
 	}
 
-	addMockEvents();
+	// addMockEvents();
 
 	setInterval(() => {
 		addMockEvents();
