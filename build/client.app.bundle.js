@@ -1896,7 +1896,7 @@ function loadLocale(name) {
             module && module.exports) {
         try {
             oldLocale = globalLocale._abbr;
-            __webpack_require__(121)("./" + name);
+            __webpack_require__(122)("./" + name);
             // because defineLocale currently also sets the global locale, we
             // want to undo that for lazy loaded locales
             getSetGlobalLocale(oldLocale);
@@ -15649,163 +15649,61 @@ return zhTw;
 
 
 angular.module('TradeshiftPulseApp', [])
-	.constant('API_DOMAIN', 'http://localhost:3000')
-	.constant('API_POLL_URL', '/data')
-	.constant('POLL_TIMEOUT', 1000)
-	.constant('MAP_WIDTH', 1280) // SVG
-	.constant('MAP_HEIGHT', 800) // SVG
-	.service('AppService', ['API_DOMAIN', 'API_POLL_URL', '$http', function(API_DOMAIN, API_POLL_URL, $http) {
-
-		var buildURL = function(from, to) {
-			return `${API_DOMAIN}${API_POLL_URL}/from/${from.toISOString()}/to/${to.toISOString()}`;
-		};
-
-		/*
-		 * poll for data collected between {@fromDate} until {@toDate} (default: now)
-		 */
-		this.poll = function(fromDate, toDate) {
-			if (!fromDate) {
-				throw "Missing parameter 'fromDate'";
-			}
-
-			fromDate = new Date(fromDate);
-			if (!toDate) {
-				toDate = new Date();
-			}
-
-			return $http.get(buildURL(fromDate, toDate));
-		};
-
-	}])
-	// .service('PixiService', ['MAP_WIDTH', 'MAP_HEIGHT', function(MAP_WIDTH, MAP_HEIGHT){
-		
-	// 	var countryToPixiCountry = function(country) {
-	// 		return {
-	// 			iso: country.iso,
-	// 			lat: country.lat,
-	// 			lon: country.lon,
-	// 			x: ((MAP_WIDTH / 360) * (180 + parseFloat(country.lon))),
-	// 			y: ((MAP_HEIGHT / 180) * (90 - parseFloat(country.lat)))
-	// 		};
-	// 	};
-
-	// 	var eventToPixiEvent = function(event) {
-	// 		return {
-	// 			source: countryToPixiCountry(event.source),
-	// 			dest: countryToPixiCountry(event.dest),
-	// 			volume: event.volume
-	// 		};
-	// 	};
-
-	// 	this.publish = function(events) {
-	// 		var pixiEvents = [];
-	// 		for (var i = 0; i < events.length; i++) {
-	// 			pixiEvents.push(eventToPixiEvent(events[i]));
-	// 		}
-
-	// 		// TODO: display events on PixiJS (asaf/jim)
-	// 		return pixiEvents;
-	// 	};
-
-	// }])
-	.service('PixiService', ['MAP_WIDTH', 'MAP_HEIGHT', __webpack_require__(118)])
-	.controller('AppController', ['POLL_TIMEOUT', 'PixiService', 'AppService', '$scope', function(POLL_TIMEOUT, PixiService, AppService, $scope) {
-
-		var lastTimeStamp = new Date();
-
-		$scope.error = function(msg) {
-			$scope.errorMessage = msg;
-		};
-
-		$scope.poll = function(){
-			setTimeout(function(){
-				AppService.poll(lastTimeStamp).then(function(response) {
-					lastTimeStamp = response.data.end_time; // end of time range already visualized
-					$scope.template_path = PixiService.publish(response.data.events);
-					setTimeout($scope.poll, POLL_TIMEOUT); // go again
-				}).catch(function(error) {
-					$scope.error(error);
-				});
-			}, POLL_TIMEOUT);
-		};
-
-		// init function
-		(function(){
-			$scope.poll();
-			// console.log(PixiService.publish([
-			// 	{
-			// 		source: {
-			// 			iso: 'US',
-			// 			lat: '37.09024',
-			// 			lon: '-95.712891'
-			// 		},
-			// 		dest: {
-			// 			iso: 'CA',
-			// 			lat: '56.130366',
-			// 			lon: '-106.346771'
-			// 		},
-			// 		volume: 123456789
-			// 	},
-			// 	{
-			// 		source: {
-			// 			iso: 'CA',
-			// 			lat: '56.130366',
-			// 			lon: '-106.346771'
-			// 		},
-			// 		dest: {
-			// 			iso: 'US',
-			// 			lat: '37.09024',
-			// 			lon: '-95.712891'
-			// 		},
-			// 		volume: 123456789
-			// 	},
-			// 	{
-			// 		source: {
-			// 			iso: 'CH',
-			// 			lat: '46.818188',
-			// 			lon: '8.227512'
-			// 		},
-			// 		dest: {
-			// 			iso: 'CL',
-			// 			lat: '-35.675147',
-			// 			lon: '-71.542969'
-			// 		},
-			// 		volume: 123456789
-			// 	}
-			// ]))
-		})();
-
-	}]);
+	.service('AppService', __webpack_require__(118))
+	.service('PixiService', __webpack_require__(119))
+	.controller('AppController', __webpack_require__(124));
 
 
 /***/ }),
 /* 118 */
+/***/ (function(module, exports) {
+
+function AppService($http) {
+	const service = {};
+
+	/*
+	 * get latest TS events
+	 */
+	service.getEvents = function(fromDate) {
+		return $http.get(`/events/from/${new Date(fromDate).toISOString()}`);
+	};
+
+	return service;
+}
+
+module.exports = ['$http', AppService];
+
+
+/***/ }),
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
 
 
-const _ = __webpack_require__(119);
+const _ = __webpack_require__(120);
 const moment = __webpack_require__(0);
-const Connection = __webpack_require__(122);
+const Connection = __webpack_require__(123);
+const MAP_WIDTH = 1280;
+const MAP_HEIGHT = 800;
 
-/* @ngInject */
-function PixiService(ConfigService) {
+function PixiService() {
 	const stage = new PIXI.Stage(0x000000);
-	
+
 	const myView = document.getElementById('map');
-	const renderer = PIXI.autoDetectRenderer(1280, 800, {antialiasing: true, transparent: true, resolution: 1});
+	const renderer = PIXI.autoDetectRenderer(MAP_WIDTH, MAP_HEIGHT, {antialiasing: true, transparent: true, resolution: 1});
 	myView.appendChild(renderer.view);
-	 
+
 	const locationNames = _.range(100);
 	const locations = getRandomLocations();
 	const connections = [];
-	
+
 	const service = {};
 
 	mainLoop();
-	
+
 	// console.log(JSON.stringify(locations, null, '\t'));
-	
+
 	function getRandomLocationNamePair() {
 		const firstIndex = getRandomInt(0, locationNames.length);
 		const firstName = locationNames[firstIndex];
@@ -15817,7 +15715,7 @@ function PixiService(ConfigService) {
 		// console.log(JSON.stringify(result, null, '\t'));
 		return result;
 	}
-	
+
 	function getRandomLocations() {
 		return _.reduce(locationNames, (data, locationName) => {
 			return _.assign({}, data, {
@@ -15825,7 +15723,7 @@ function PixiService(ConfigService) {
 			});
 		}, {});
 	}
-	
+
 	const events = _.reduce(_.range(1), (data, value) => {
 		const gap = getRandomInt(0, 1);
 		let nextMoment = _.isNil(data.lastMoment) ? moment() : data.lastMoment;
@@ -15839,9 +15737,9 @@ function PixiService(ConfigService) {
 		data.lastMoment = nextMoment;
 		return data;
 	}, { events: [], lastMoment: null }).events;
-	
+
 	// console.log(JSON.stringify(events, null, '\t'));
-	
+
 	_.each(events, ({ sourceLocationName, targetLocationName, timestamp }) => {
 		// console.log('sourceLocationName', sourceLocationName, 'targetLocationName', targetLocationName);
 		const srcPoint = locations[sourceLocationName];
@@ -15851,7 +15749,7 @@ function PixiService(ConfigService) {
 		const connection = new Connection({ srcPoint, dstPoint, timestamp });
 		connections.push(connection);
 	});
-	
+
 	function mainLoop() {
 		const currentMoment = moment();
 		_.each(connections, (connection) => {
@@ -15875,27 +15773,56 @@ function PixiService(ConfigService) {
 		renderer.render(stage);
 		requestAnimationFrame(mainLoop);
 	}
-	
+
 	function getRandomInt(min, max) {
 		min = Math.ceil(min);
 		max = Math.floor(max);
 		return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 	}
-	
+
 	function getRandomPoint() {
 		return {
 			x: getRandomInt(0, 1000),
 			y: getRandomInt(0, 1000),
 		};
 	}
-		
+
+	function countryToPixiCountry(country) {
+		return {
+			iso: country.iso,
+			lat: country.lat,
+			lon: country.lon,
+			x: ((MAP_WIDTH / 360) * (180 + parseFloat(country.lon))),
+			y: ((MAP_HEIGHT / 180) * (90 - parseFloat(country.lat)))
+		};
+	};
+
+	function eventToPixiEvent(event) {
+		return {
+			source: countryToPixiCountry(event.source),
+			dest: countryToPixiCountry(event.dest),
+			volume: event.volume
+		};
+	};
+
+	service.publish = function(events) {
+		var pixiEvents = [];
+		for (var i = 0; i < events.length; i++) {
+			pixiEvents.push(eventToPixiEvent(events[i]));
+		}
+
+		// TODO: display events on PixiJS (asaf/jim)
+		return pixiEvents;
+	};
+
 	return service;
 }
 
 module.exports = PixiService;
 
+
 /***/ }),
-/* 119 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -32984,10 +32911,10 @@ module.exports = PixiService;
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(120), __webpack_require__(1)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(121), __webpack_require__(1)(module)))
 
 /***/ }),
-/* 120 */
+/* 121 */
 /***/ (function(module, exports) {
 
 var g;
@@ -33014,7 +32941,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 121 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
@@ -33263,10 +33190,10 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 121;
+webpackContext.id = 122;
 
 /***/ }),
-/* 122 */
+/* 123 */
 /***/ (function(module, exports) {
 
 const easing = 0.08; // Size of each step along the path
@@ -33352,6 +33279,41 @@ class Connection {
 }
 
 module.exports = Connection;
+
+/***/ }),
+/* 124 */
+/***/ (function(module, exports) {
+
+const POLL_TIMEOUT = 1000;
+
+function AppController(PixiService, AppService, $scope) {
+
+	var lastTimeStamp = new Date();
+
+	$scope.error = function(msg) {
+		$scope.errorMessage = msg;
+	};
+
+	$scope.poll = function(){
+		setTimeout(function(){
+			AppService.getEvents(lastTimeStamp).then(function(response) {
+				lastTimeStamp = response.data.end_time; // end of time range already visualized
+				$scope.template_path = PixiService.publish(response.data.events);
+				setTimeout($scope.poll, POLL_TIMEOUT); // go again
+			}).catch(function(error) {
+				$scope.error(error);
+			});
+		}, POLL_TIMEOUT);
+	};
+
+	// init function
+	(function(){
+		$scope.poll();
+	})();
+}
+
+module.exports = ['PixiService', 'AppService', '$scope', AppController];
+
 
 /***/ })
 /******/ ]);
