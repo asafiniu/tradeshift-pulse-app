@@ -8,31 +8,22 @@ function AppController(PixiService, AppService, $scope) {
 		$scope.errorMessage = msg;
 	};
 
-	$scope.poll = function(){
-		// setTimeout(function(){
-		// 	AppService.getEvents(lastTimeStamp).then(function(response) {
-		// 		lastTimeStamp = response.data.end_time; // end of time range already visualized
-		// 		$scope.template_path = PixiService.publish(response.data.events);
-		// 		setTimeout($scope.poll, POLL_TIMEOUT); // go again
-		// 	}).catch(function(error) {
-		// 		$scope.error(error);
-		// 	});
-		// }, POLL_TIMEOUT);
+	AppService.getEventsSSE(lastTimeStamp, function(data) {
+		var jsonData = {};
+		var error = '';
+		try {
+			jsonData = JSON.parse(data);
+		} catch (e) {
+			jsonData = {};
+		}
 
-		AppService.getEventsSSE(lastTimeStamp, function(response) {
-			if (response.ok) {
-				lastTimeStamp = response.data.end_time; // end of time range already visualized
-				$scope.template_path = PixiService.publish(response.data.events);
-			} else {
-				$scope.error(response.error);
-			}
-		});
-	};
-
-	// init function
-	(function(){
-		// $scope.poll();
-	})();
+		if (jsonData && jsonData.volume) {
+			// lastTimeStamp = jsonData.end_time; // end of time range already visualized
+			PixiService.publish([jsonData]);
+		} else {
+			$scope.error(error);
+		}
+	});
 }
 
 module.exports = ['PixiService', 'AppService', '$scope', AppController];

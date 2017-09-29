@@ -9,7 +9,7 @@ const api_path = '/events'
 app.use('/', serveStatic(path.join(__dirname, '..')));
 app.use('/build', serveStatic(path.join(__dirname, './build')));
 app.use('/events/from/:start_time', function(req, res) {
-    req.pipe(request(`${api_host}${api_path}?lastseen=${req.params.start_time}`)).pipe(res)
+	req.pipe(request(`${api_host}${api_path}?lastseen=${req.params.start_time}`)).pipe(res)
 });
 
 app.listen(3000, function () {

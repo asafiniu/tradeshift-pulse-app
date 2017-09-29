@@ -12,11 +12,12 @@ function PixiService() {
 	const myView = document.getElementById('map');
 	const renderer = PIXI.autoDetectRenderer(MAP_WIDTH, MAP_HEIGHT, {antialiasing: true, transparent: true, resolution: 1});
 	myView.appendChild(renderer.view);
+	myView.parentElement.style.width = MAP_WIDTH + 'px';
 
 	const locationNames = _.range(100);
 	const locations = getRandomLocations();
 	let connections = [];
-	
+
 	const service = {};
 
 	mainLoop();
@@ -42,7 +43,7 @@ function PixiService() {
 			});
 		}, {});
 	}
-	
+
 	const events = _.reduce(_.range(200), (data, value) => {
 		const gap = getRandomInt(0, 1);
 		console.log('gap=', gap);
