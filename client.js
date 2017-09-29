@@ -36,8 +36,8 @@ angular.module('TradeshiftPulseApp', [])
 				iso: country.iso,
 				lat: country.lat,
 				lon: country.lon,
-				x: ((MAP_WIDTH / 360) * (180 + country.lon)),
-				y: ((MAP_HEIGHT / 180) * (90 - country.lat)),
+				x: ((MAP_WIDTH / 360) * (180 + parseFloat(country.lon))),
+				y: ((MAP_HEIGHT / 180) * (90 - parseFloat(country.lat)))
 			};
 		};
 
@@ -83,6 +83,47 @@ angular.module('TradeshiftPulseApp', [])
 		// init function
 		(function(){
 			$scope.poll();
+			// console.log(PixiService.publish([
+			// 	{
+			// 		source: {
+			// 			iso: 'US',
+			// 			lat: '37.09024',
+			// 			lon: '-95.712891'
+			// 		},
+			// 		dest: {
+			// 			iso: 'CA',
+			// 			lat: '56.130366',
+			// 			lon: '-106.346771'
+			// 		},
+			// 		volume: 123456789
+			// 	},
+			// 	{
+			// 		source: {
+			// 			iso: 'CA',
+			// 			lat: '56.130366',
+			// 			lon: '-106.346771'
+			// 		},
+			// 		dest: {
+			// 			iso: 'US',
+			// 			lat: '37.09024',
+			// 			lon: '-95.712891'
+			// 		},
+			// 		volume: 123456789
+			// 	},
+			// 	{
+			// 		source: {
+			// 			iso: 'CH',
+			// 			lat: '46.818188',
+			// 			lon: '8.227512'
+			// 		},
+			// 		dest: {
+			// 			iso: 'CL',
+			// 			lat: '-35.675147',
+			// 			lon: '-71.542969'
+			// 		},
+			// 		volume: 123456789
+			// 	}
+			// ]))
 		})();
 
 	}]);
