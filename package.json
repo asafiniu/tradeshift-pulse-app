@@ -17,6 +17,7 @@
     "angularjs-server": "0.0.31",
     "express": "^4.16.0",
     "fs": "0.0.1-security",
-    "request": "^2.83.0"
+    "request": "^2.83.0",
+    "webpack": "^3.6.0"
   }
 }
