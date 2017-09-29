@@ -2,10 +2,12 @@
   "name": "ts-pulse",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "app.bundle.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "build:client": "webpack --watch --progress --config webpack.config.js",
+    "clean:build": "rm -rf build && mkdir build",
+    "dev:client": "npm run clean:build && npm run build:client",
+    "dev:server": "node src/server/server.app.js"
   },
   "author": "",
   "license": "ISC",

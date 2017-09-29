@@ -29,37 +29,38 @@ angular.module('TradeshiftPulseApp', [])
 		};
 
 	}])
-	.service('PixiService', ['MAP_WIDTH', 'MAP_HEIGHT', function(MAP_WIDTH, MAP_HEIGHT){
+	// .service('PixiService', ['MAP_WIDTH', 'MAP_HEIGHT', function(MAP_WIDTH, MAP_HEIGHT){
+		
+	// 	var countryToPixiCountry = function(country) {
+	// 		return {
+	// 			iso: country.iso,
+	// 			lat: country.lat,
+	// 			lon: country.lon,
+	// 			x: ((MAP_WIDTH / 360) * (180 + parseFloat(country.lon))),
+	// 			y: ((MAP_HEIGHT / 180) * (90 - parseFloat(country.lat)))
+	// 		};
+	// 	};
 
-		var countryToPixiCountry = function(country) {
-			return {
-				iso: country.iso,
-				lat: country.lat,
-				lon: country.lon,
-				x: ((MAP_WIDTH / 360) * (180 + parseFloat(country.lon))),
-				y: ((MAP_HEIGHT / 180) * (90 - parseFloat(country.lat)))
-			};
-		};
+	// 	var eventToPixiEvent = function(event) {
+	// 		return {
+	// 			source: countryToPixiCountry(event.source),
+	// 			dest: countryToPixiCountry(event.dest),
+	// 			volume: event.volume
+	// 		};
+	// 	};
 
-		var eventToPixiEvent = function(event) {
-			return {
-				source: countryToPixiCountry(event.source),
-				dest: countryToPixiCountry(event.dest),
-				volume: event.volume
-			};
-		};
+	// 	this.publish = function(events) {
+	// 		var pixiEvents = [];
+	// 		for (var i = 0; i < events.length; i++) {
+	// 			pixiEvents.push(eventToPixiEvent(events[i]));
+	// 		}
 
-		this.publish = function(events) {
-			var pixiEvents = [];
-			for (var i = 0; i < events.length; i++) {
-				pixiEvents.push(eventToPixiEvent(events[i]));
-			}
+	// 		// TODO: display events on PixiJS (asaf/jim)
+	// 		return pixiEvents;
+	// 	};
 
-			// TODO: display events on PixiJS (asaf/jim)
-			return pixiEvents;
-		};
-
-	}])
+	// }])
+	.service('PixiService', ['MAP_WIDTH', 'MAP_HEIGHT', require('./pixiService')])
 	.controller('AppController', ['POLL_TIMEOUT', 'PixiService', 'AppService', '$scope', function(POLL_TIMEOUT, PixiService, AppService, $scope) {
 
 		var lastTimeStamp = new Date();
