@@ -14,20 +14,17 @@ class Connection {
 		this.dstPoint = dstPoint;
 		this.timestamp = timestamp;
 		this.graphics = new PIXI.Graphics()
+		this.onStage = false;
 	}
 	
 	getGraphics() {
 		return this.graphics;
 	}
 
-	getTimestamp() {
-		return this.timestamp;
-	}
-
 	isOlderThan(timestamp) {
 		// console.log('timestamp.valueOf()', timestamp.valueOf());
 		// console.log('this.timestamp.valueOf()', this.timestamp.valueOf());
-		return timestamp.valueOf() > this.timestamp.valueOf();
+		return timestamp > this.timestamp;
 	}
 
 	isOnStage() {

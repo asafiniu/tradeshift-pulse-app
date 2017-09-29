@@ -1,5 +1,3 @@
-
-
 const _ = require('lodash');
 const moment = require('moment');
 const Connection = require('./Connection');
@@ -14,7 +12,7 @@ function PixiService(ConfigService) {
 	 
 	const locationNames = _.range(100);
 	const locations = getRandomLocations();
-	const connections = [];
+	let connections = [];
 	
 	const service = {};
 
@@ -42,13 +40,13 @@ function PixiService(ConfigService) {
 		}, {});
 	}
 	
-	const events = _.reduce(_.range(1), (data, value) => {
-		const gap = getRandomInt(0, 1);
-		let nextMoment = _.isNil(data.lastMoment) ? moment() : data.lastMoment;
+	const events = _.reduce(_.range(100), (data, value) => {
+		const gap = getRandomInt(0, 5);
+		let nextMoment = _.isNil(data.lastMoment) ? moment() : moment(data.lastMoment);
 		nextMoment = nextMoment.add(gap, 'seconds');
 		const locationPair = getRandomLocationNamePair();
 		data.events.push({
-			timestamp: nextMoment,
+			timestamp: nextMoment.valueOf(),
 			sourceLocationName: locationPair.firstName,
 			targetLocationName: locationPair.secondName,
 		});
@@ -69,25 +67,22 @@ function PixiService(ConfigService) {
 	});
 	
 	function mainLoop() {
-		const currentMoment = moment();
+		const currentMoment = moment().valueOf();
 		_.each(connections, (connection) => {
 			// console.log('connection.getTimestamp()', connection.getTimestamp());
-			console.log('connection.isOnStage()', connection.isOnStage());
-			console.log('connection.isOlderThan(currentMoment)', connection.isOlderThan(currentMoment));
-			if ((connection.isOlderThan(currentMoment)) && (!connection.isOnStage())) {
-			// if (!connection.isOnStage()) {
-				console.log('here');
+			// console.log('connection.isOnStage()', connection.isOnStage());
+			// console.log('connection.isOlderThan(currentMoment)', connection.isOlderThan(currentMoment));
+			if ((connection.isOlderThan(currentMoment)) && (!connection.isOnStage()) && (!connection.isComplete())) {
 				connection.addToStage(stage);
 			}
 			if (connection.isOnStage()) {
 				connection.update();
 				if (connection.isComplete()) {
 					connection.removeFromStage(stage);
-					// todo use a better data structure than array
-					_.remove(connections, connection);
 				}
 			}
-		})
+		});
+		connections = _.remove(connections, (connection) => !connection.isComplete());
 		renderer.render(stage);
 		requestAnimationFrame(mainLoop);
 	}

@@ -83,7 +83,7 @@ angular.module('TradeshiftPulseApp', [])
 
 		// init function
 		(function(){
-			$scope.poll();
+			// $scope.poll();
 			// console.log(PixiService.publish([
 			// 	{
 			// 		source: {
