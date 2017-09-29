@@ -22,7 +22,7 @@ function AppController(PixiService, AppService, $scope) {
 
 	// init function
 	(function(){
-		$scope.poll();
+		// $scope.poll();
 	})();
 }
 
