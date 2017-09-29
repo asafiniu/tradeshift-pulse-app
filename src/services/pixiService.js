@@ -29,17 +29,23 @@ function PixiService() {
 	function getRandomLocationNamePair() {
 		const firstIndex = getRandomInt(0, locationNames.length - 1);
 		const firstName = locationNames[firstIndex];
-		const otherNames = _.omit(locationNames, firstName);
-		// console.log('otherNames', otherNames);
-		const secondIndex = getRandomInt(0, locationNames.length - 2);
+		const otherNames = _.reduce(locationNames, (data, locationName) => {
+			if (locationName !== firstName) {
+				data.push(locationName);
+			}
+			return data;
+		}, []);
+		// console.log('locationNames', locationNames, 'otherNames', otherNames);
+		const secondIndex = getRandomInt(0, otherNames.length - 1);
 		const secondName = otherNames[secondIndex];
 		const result = { firstName, secondName };
-		// console.log(JSON.stringify(result, null, '\t'));
+		// console.log('getRandomLocationNamePair', JSON.stringify(result, null, '\t'));
 		return result;
 	}
 
 	function getRandomLocations() {
 		return _.reduce(locationNames, (data, locationName) => {
+			console.log('locationName', locationName);
 			return _.assign({}, data, {
 				[locationName]: getRandomPoint(),
 			});
@@ -66,10 +72,11 @@ function PixiService() {
 		// console.log('sourceLocationName', sourceLocationName, 'targetLocationName', targetLocationName);
 		const srcPoint = locations[sourceLocationName];
 		const dstPoint = locations[targetLocationName];
-		console.log('srcPoint', JSON.stringify(srcPoint, null, '\t'));
-		console.log('dstPoint', JSON.stringify(dstPoint, null, '\t'));
+		// console.log('srcPoint', JSON.stringify(srcPoint, null, '\t'));
+		// console.log('dstPoint', JSON.stringify(dstPoint, null, '\t'));
 		const color = getNextColor();
-		const connection = new Connection({ srcPoint, dstPoint, timestamp, color });
+		const volume = getRandomInt(3, 15);
+		const connection = new Connection({ srcPoint, dstPoint, timestamp, color, volume });
 		connections.push(connection);
 	});
 
@@ -105,8 +112,8 @@ function PixiService() {
 
 	function getRandomPoint() {
 		return {
-			x: getRandomInt(0, 1000),
-			y: getRandomInt(0, 1000),
+			x: getRandomInt(0, MAP_WIDTH),
+			y: getRandomInt(0, MAP_HEIGHT),
 		};
 	}
 
@@ -124,16 +131,33 @@ function PixiService() {
 		return {
 			source: countryToPixiCountry(event.source),
 			dest: countryToPixiCountry(event.dest),
-			volume: event.volume
+			volume: event.volume,
+			// added
+			// timestamp: moment().valueOf(),
 		};
 	};
 
 	service.publish = function(events) {
+		// events = [
+		// 	{
+		// 		source: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
+		// 		dest: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
+		// 		volume: 12305918750980980
+		// 	}, {
+		// 		source: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
+		// 		dest: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
+		// 		volume: 233235325
+		// 	}, {
+		// 		source: {iso: 'CH', lat: '46.818188', lon: '8.227512'},
+		// 		dest: {iso: 'CL', lat: '-35.675147', lon: '-71.542969'},
+		// 		volume: 123452312321111114434346789
+		// 	}
+		// ];
 		var pixiEvents = [];
 		for (var i = 0; i < events.length; i++) {
 			pixiEvents.push(eventToPixiEvent(events[i]));
 		}
-
+		console.log(pixiEvents);
 		// TODO: display events on PixiJS (asaf/jim)
 		return pixiEvents;
 	};
