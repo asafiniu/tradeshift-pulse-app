@@ -7,7 +7,7 @@
     "build:client": "webpack --watch --progress --config webpack.config.js",
     "clean:build": "rm -rf build && mkdir build",
     "dev:client": "npm run clean:build && npm run build:client",
-    "dev:server": "node src/server/server.app.js"
+    "dev:server": "node src/server.app.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,8 @@
     "angularjs-server": "0.0.31",
     "express": "^4.16.0",
     "fs": "0.0.1-security",
+    "moment": "^2.18.1",
+    "ng-inject": "^1.0.0",
     "request": "^2.83.0",
     "webpack": "^3.6.0"
   }
