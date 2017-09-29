@@ -43,42 +43,86 @@ function PixiService() {
 		return result;
 	}
 
+	// function getRandomLocations() {
+	// 	return _.reduce(locationNames, (data, locationName) => {
+	// 		console.log('locationName', locationName);
+	// 		return _.assign({}, data, {
+	// 			[locationName]: getRandomPoint(),
+	// 		});
+	// 	}, {});
+	// }
+
 	function getRandomLocations() {
 		return _.reduce(locationNames, (data, locationName) => {
-			console.log('locationName', locationName);
+			// console.log('locationName', locationName);
+			const point = getRandomPoint();
 			return _.assign({}, data, {
-				[locationName]: getRandomPoint(),
+				[locationName]: {
+					iso: '',
+					lat: '',
+					lon: '',
+					x: point.x,
+					y: point.y,
+				},
 			});
 		}, {});
 	}
 
-	const events = _.reduce(_.range(50), (data, value) => {
-		const gap = getRandomInt(0, 1);
+	// const events = _.reduce(_.range(500), (data, value) => {
+	// 	const gap = getRandomNumber(0, 1);
+	// 	let nextMoment = _.isNil(data.lastMoment) ? moment() : moment(data.lastMoment);
+	// 	nextMoment = nextMoment.add(gap, 'seconds');
+	// 	const locationPair = getRandomLocationNamePair();
+	// 	data.events.push({
+	// 		timestamp: nextMoment.valueOf(),
+	// 		sourceLocationName: locationPair.firstName,
+	// 		targetLocationName: locationPair.secondName,
+	// 	});
+	// 	data.lastMoment = nextMoment;
+	// 	return data;
+	// }, { events: [], lastMoment: null }).events;
+
+	const mockEvents = _.reduce(_.range(500), (data, value) => {
+		const gap = getRandomNumber(0, 1);
 		let nextMoment = _.isNil(data.lastMoment) ? moment() : moment(data.lastMoment);
 		nextMoment = nextMoment.add(gap, 'seconds');
 		const locationPair = getRandomLocationNamePair();
-		data.events.push({
-			timestamp: nextMoment.valueOf(),
-			sourceLocationName: locationPair.firstName,
-			targetLocationName: locationPair.secondName,
-		});
+		const timestamp = nextMoment.valueOf();
+		const source = locations[locationPair.firstName];
+		const dest = locations[locationPair.secondName];
+		const volume = getRandomVolume();
+		data.events.push({ timestamp, source, dest, volume });
 		data.lastMoment = nextMoment;
 		return data;
 	}, { events: [], lastMoment: null }).events;
 
 	// console.log(JSON.stringify(events, null, '\t'));
+	// addConnections(mockEvents);
 
-	_.each(events, ({ sourceLocationName, targetLocationName, timestamp }) => {
-		// console.log('sourceLocationName', sourceLocationName, 'targetLocationName', targetLocationName);
-		const srcPoint = locations[sourceLocationName];
-		const dstPoint = locations[targetLocationName];
-		// console.log('srcPoint', JSON.stringify(srcPoint, null, '\t'));
-		// console.log('dstPoint', JSON.stringify(dstPoint, null, '\t'));
-		const color = getNextColor();
-		const volume = getRandomInt(3, 15);
-		const connection = new Connection({ srcPoint, dstPoint, timestamp, color, volume });
-		connections.push(connection);
-	});
+	// _.each(events, ({ timestamp, source, dest, volume }) => {
+	// 	// console.log('sourceLocationName', sourceLocationName, 'targetLocationName', targetLocationName);
+	// 	const srcPoint = locations[sourceLocationName];
+	// 	const dstPoint = locations[targetLocationName];
+	// 	// console.log('srcPoint', JSON.stringify(srcPoint, null, '\t'));
+	// 	// console.log('dstPoint', JSON.stringify(dstPoint, null, '\t'));
+	// 	const color = getNextColor();
+	// 	const volume = getRandomInt(3, 15);
+	// 	const connection = new Connection({ srcPoint, dstPoint, timestamp, color, volume });
+	// 	connections.push(connection);
+	// });
+
+	function addConnections(events) {
+		_.each(events, ({ timestamp, source, dest, volume }) => {
+			// console.log('sourceLocationName', sourceLocationName, 'targetLocationName', targetLocationName);
+			// const srcPoint = locations[sourceLocationName];
+			// const dstPoint = locations[targetLocationName];
+			// console.log('srcPoint', JSON.stringify(srcPoint, null, '\t'));
+			// console.log('dstPoint', JSON.stringify(dstPoint, null, '\t'));
+			const color = getNextColor();
+			const connection = new Connection({ source, dest, timestamp, color, volume });
+			connections.push(connection);
+		});
+	}
 
 	function mainLoop() {
 		const currentTimestamp = moment().valueOf();
@@ -96,18 +140,21 @@ function PixiService() {
 				}
 			}
 		});
-		connections = _.remove(connections, (connection) => !connection.isComplete());
+		_.remove(connections, (connection) => connection.isComplete());
 		renderer.render(stage);
 		requestAnimationFrame(mainLoop);
 	}
 
 	function getNextColor() {
-		return connectionColors[getRandomInt(0, connectionColors.length)];
+		return connectionColors[getRandomInt(0, connectionColors.length - 1)];
+	}
+
+	function getRandomNumber(min, max) {
+		return min + (Math.random() * (max - min));
 	}
 
 	function getRandomInt(min, max) {
-		const int = Math.floor(Math.random() * (max - min + 1)) + min;
-		return int;
+		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
 	function getRandomPoint() {
@@ -118,49 +165,82 @@ function PixiService() {
 	}
 
 	function countryToPixiCountry(country) {
+		const point = getRandomPoint();
 		return {
 			iso: country.iso,
 			lat: country.lat,
 			lon: country.lon,
-			x: ((MAP_WIDTH / 360) * (180 + parseFloat(country.lon))),
-			y: ((MAP_HEIGHT / 180) * (90 - parseFloat(country.lat)))
+			// x: ((MAP_WIDTH / 360) * (180 + parseFloat(country.lon))),
+			// y: ((MAP_HEIGHT / 180) * (90 - parseFloat(country.lat)))
+			x: point.x,
+			y: point.y,
 		};
 	};
 
-	function eventToPixiEvent(event) {
+	function eventToPixiEvent(event, timestamp) {
 		return {
 			source: countryToPixiCountry(event.source),
 			dest: countryToPixiCountry(event.dest),
-			volume: event.volume,
-			// added
-			// timestamp: moment().valueOf(),
+			volume: getRandomVolume(),
+			timestamp,
 		};
 	};
 
+	function getRandomVolume() {
+		return getRandomInt(3, 15);
+	}
+
+	function getRandomTimestamp({ period }) {
+		const delay = getRandomNumber(0, period);
+		return moment().add(delay, 'seconds').valueOf();
+	}
+
 	service.publish = function(events) {
-		// events = [
-		// 	{
-		// 		source: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
-		// 		dest: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
-		// 		volume: 12305918750980980
-		// 	}, {
-		// 		source: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
-		// 		dest: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
-		// 		volume: 233235325
-		// 	}, {
-		// 		source: {iso: 'CH', lat: '46.818188', lon: '8.227512'},
-		// 		dest: {iso: 'CL', lat: '-35.675147', lon: '-71.542969'},
-		// 		volume: 123452312321111114434346789
-		// 	}
-		// ];
-		var pixiEvents = [];
+		const pixiEvents = [];
+		const period = 5;
 		for (var i = 0; i < events.length; i++) {
-			pixiEvents.push(eventToPixiEvent(events[i]));
+			const timestamp = getRandomTimestamp({ period });
+			pixiEvents.push(eventToPixiEvent(events[i], timestamp));
 		}
-		console.log(pixiEvents);
+		// console.log('pixiEvents', JSON.stringify(pixiEvents, null, '\t'));
+		// console.log('pixiEvents.length', pixiEvents.length);
+		addConnections(pixiEvents);
+		console.log('connections.length', connections.length);
 		// TODO: display events on PixiJS (asaf/jim)
 		return pixiEvents;
 	};
+
+	function addMockEvents() {
+		const events = _.reduce(_.range(200), (data) => {
+			return _.union(data, [
+				{
+					source: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
+					dest: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
+					volume: 12305918750980980,
+				},
+				// {
+				// 	source: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
+				// 	dest: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
+				// 	volume: 12305918750980980
+				// }, {
+				// 	source: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
+				// 	dest: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
+				// 	volume: 233235325
+				// }, {
+				// 	source: {iso: 'CH', lat: '46.818188', lon: '8.227512'},
+				// 	dest: {iso: 'CL', lat: '-35.675147', lon: '-71.542969'},
+				// 	volume: 123452312321111114434346789
+				// }
+			]);
+		}, []);
+		service.publish(events);
+	}
+
+	addMockEvents();
+
+	setInterval(() => {
+		addMockEvents();
+	}, 5000);
 
 	return service;
 }

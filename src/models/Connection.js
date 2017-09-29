@@ -7,13 +7,13 @@ function dist(x1, y1, x2, y2) {
 }
 
 class Connection {
-	constructor({ srcPoint, dstPoint, timestamp, color, volume }) {
+	constructor({ source, dest, timestamp, color, volume }) {
 		// console.log(JSON.stringify(srcPoint, null, '\t'));
 		// console.log(JSON.stringify(dstPoint, null, '\t'));
 		// console.log(JSON.stringify(timestamp, null, '\t'));
-		this.currentPoint = { x: srcPoint.x, y: srcPoint.y };
-		this.srcPoint = srcPoint;
-		this.dstPoint = dstPoint;
+		this.currentPoint = { x: source.x, y: source.y };
+		this.srcPoint = source;
+		this.dstPoint = dest;
 		this.timestamp = timestamp;
 		this.color = color;
 		this.line = new PIXI.Graphics();
