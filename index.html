@@ -6,9 +6,25 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	</head>
 	<body ng-controller="AppController">
+		<div class="logo"></div>
 		<div ng-view id="map"></div>
-
-		<div id="odometer" class="odometer">0</div>
+		<div id="text">
+			<h1>Pulse</h1>
+			<h3>The beating sound of Tradeshift</h3>
+			<div>
+				This is a live map of all server events<br>
+				and activities happening on Tradeshift<br>
+				network at the moment.
+			</div>
+			<div>
+				<div id="odometer" class="blue">0</div>
+				<p class="grey">Monetary Volume (USD)</p>
+			</div>
+			<div>
+				<div id="time" class="blue">{{ currentTime }}</div>
+				<p class="grey">Starting Time of Data Capture</p>
+			</div>
+		</div>
 		<div style="display:none">
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.6/pixi.js"></script>
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.2/TweenLite.min.js"></script>
