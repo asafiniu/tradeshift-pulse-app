@@ -19,6 +19,8 @@ function PixiService() {
 	
 	const service = {};
 
+	const connectionColors = [0x00B0FF, 0xFCBF12, 0x4FC610, 0xF2F2F2];
+
 	mainLoop();
 
 	// console.log(JSON.stringify(locations, null, '\t'));
@@ -43,9 +45,8 @@ function PixiService() {
 		}, {});
 	}
 	
-	const events = _.reduce(_.range(200), (data, value) => {
+	const events = _.reduce(_.range(50), (data, value) => {
 		const gap = getRandomInt(0, 1);
-		console.log('gap=', gap);
 		let nextMoment = _.isNil(data.lastMoment) ? moment() : moment(data.lastMoment);
 		nextMoment = nextMoment.add(gap, 'seconds');
 		const locationPair = getRandomLocationNamePair();
@@ -66,7 +67,8 @@ function PixiService() {
 		const dstPoint = locations[targetLocationName];
 		console.log('srcPoint', JSON.stringify(srcPoint, null, '\t'));
 		console.log('dstPoint', JSON.stringify(dstPoint, null, '\t'));
-		const connection = new Connection({ srcPoint, dstPoint, timestamp });
+		const color = getNextColor();
+		const connection = new Connection({ srcPoint, dstPoint, timestamp, color });
 		connections.push(connection);
 	});
 
@@ -89,6 +91,10 @@ function PixiService() {
 		connections = _.remove(connections, (connection) => !connection.isComplete());
 		renderer.render(stage);
 		requestAnimationFrame(mainLoop);
+	}
+
+	function getNextColor() {
+		return connectionColors[getRandomInt(0, connectionColors.length)];
 	}
 
 	function getRandomInt(min, max) {
