@@ -9,3 +9,10 @@ body {
 	background-image: url(map.svg);
 	background-size: 1280px 800px;
 }
+
+#odometer {
+	color: #fff;
+	position: absolute;
+	top: 0;
+	left: 0;
+}

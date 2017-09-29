@@ -5,6 +5,8 @@ const moment = require('moment');
 const Connection = require('../models/Connection');
 const MAP_WIDTH = 1280;
 const MAP_HEIGHT = 800;
+const VOLUME_MIN = 3;
+const VOLUME_MAX = 15;
 
 function PixiService() {
 	const stage = new PIXI.Stage(0x000000);
@@ -45,7 +47,7 @@ function PixiService() {
 
 	function getRandomLocations() {
 		return _.reduce(locationNames, (data, locationName) => {
-			console.log('locationName', locationName);
+			// console.log('locationName', locationName);
 			return _.assign({}, data, {
 				[locationName]: getRandomPoint(),
 			});
@@ -75,7 +77,7 @@ function PixiService() {
 		// console.log('srcPoint', JSON.stringify(srcPoint, null, '\t'));
 		// console.log('dstPoint', JSON.stringify(dstPoint, null, '\t'));
 		const color = getNextColor();
-		const volume = getRandomInt(3, 15);
+		const volume = getRandomInt(VOLUME_MIN, VOLUME_MAX);
 		const connection = new Connection({ srcPoint, dstPoint, timestamp, color, volume });
 		connections.push(connection);
 	});
@@ -127,38 +129,27 @@ function PixiService() {
 		};
 	};
 
+	function awesome(volume) {
+		return Math.max(VOLUME_MIN, Math.min(VOLUME_MAX, Math.floor(Math.log10(volume))))
+	};
+
 	function eventToPixiEvent(event) {
 		return {
 			source: countryToPixiCountry(event.source),
 			dest: countryToPixiCountry(event.dest),
 			volume: event.volume,
+			awesomeness: awesome(event.volume),
 			// added
 			// timestamp: moment().valueOf(),
 		};
 	};
 
 	service.publish = function(events) {
-		// events = [
-		// 	{
-		// 		source: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
-		// 		dest: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
-		// 		volume: 12305918750980980
-		// 	}, {
-		// 		source: {iso: 'CA', lat: '56.130366', lon: '-106.346771'},
-		// 		dest: {iso: 'US', lat: '37.09024', lon: '-95.712891'},
-		// 		volume: 233235325
-		// 	}, {
-		// 		source: {iso: 'CH', lat: '46.818188', lon: '8.227512'},
-		// 		dest: {iso: 'CL', lat: '-35.675147', lon: '-71.542969'},
-		// 		volume: 123452312321111114434346789
-		// 	}
-		// ];
 		var pixiEvents = [];
 		for (var i = 0; i < events.length; i++) {
 			pixiEvents.push(eventToPixiEvent(events[i]));
 		}
-		console.log(pixiEvents);
-		// TODO: display events on PixiJS (asaf/jim)
+
 		return pixiEvents;
 	};
 

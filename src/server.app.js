@@ -3,7 +3,7 @@ const app = express()
 const serveStatic = require('serve-static')
 const path = require('path');
 const request = require('request')
-const api_host = 'http://10.128.10.248:8080'
+const api_host = 'http://10.128.8.130:8080'
 const api_path = '/events'
 
 app.use('/', serveStatic(path.join(__dirname, '..')));

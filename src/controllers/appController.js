@@ -1,6 +1,6 @@
 const POLL_TIMEOUT = 1000;
 
-function AppController(PixiService, AppService, $scope) {
+function AppController(PixiService, AppService, OdometerService, $scope) {
 
 	var lastTimeStamp = new Date();
 
@@ -18,7 +18,7 @@ function AppController(PixiService, AppService, $scope) {
 		}
 
 		if (jsonData && jsonData.volume) {
-			// lastTimeStamp = jsonData.end_time; // end of time range already visualized
+			OdometerService.addVolume(jsonData.volume);
 			PixiService.publish([jsonData]);
 		} else {
 			$scope.error(error);
@@ -26,4 +26,4 @@ function AppController(PixiService, AppService, $scope) {
 	});
 }
 
-module.exports = ['PixiService', 'AppService', '$scope', AppController];
+module.exports = ['PixiService', 'AppService', 'OdometerService', '$scope', AppController];
