@@ -6,8 +6,9 @@ var request = require('request')
 
 var templateFile = path.join(__dirname, 'index.html');
 var template = fs.readFileSync(templateFile, {encoding:'utf8'});
-var staticDir = __dirname;
 var app = express();
+
+// Server initialization
 angularserver.Server({
     template: template,
     serverScripts: [
@@ -25,7 +26,7 @@ angularserver.Server({
 });
 
 // Routes
-app.use('/', express.static(staticDir));
+app.use('/', express.static(__dirname));
 app.use('/data/from/:start_time/to/:end_time', function(req, res) {
     req.pipe(request(`http://10.128.10.248:8080/events?lastseen=${req.params.start_time}`)).pipe(res)
 });

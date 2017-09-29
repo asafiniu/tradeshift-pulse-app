@@ -6,9 +6,7 @@ angular.module('TradeshiftPulseApp', [])
 	.constant('POLL_TIMEOUT', 1000)
 	.constant('MAP_WIDTH', 1280) // SVG
 	.constant('MAP_HEIGHT', 800) // SVG
-	.service(   'AppService', [
-			    'API_DOMAIN', 'API_POLL_URL', '$http',
-		function(API_DOMAIN,   API_POLL_URL,   $http) {
+	.service('AppService', ['API_DOMAIN', 'API_POLL_URL', '$http', function(API_DOMAIN, API_POLL_URL, $http) {
 
 		var buildURL = function(from, to) {
 			return `${API_DOMAIN}${API_POLL_URL}/from/${from.toISOString()}/to/${to.toISOString()}`;
@@ -29,6 +27,7 @@ angular.module('TradeshiftPulseApp', [])
 
 			return $http.get(buildURL(fromDate, toDate));
 		};
+
 	}])
 	.service('PixiService', ['MAP_WIDTH', 'MAP_HEIGHT', function(MAP_WIDTH, MAP_HEIGHT){
 
@@ -61,31 +60,29 @@ angular.module('TradeshiftPulseApp', [])
 		};
 
 	}])
-	.controller('AppController', [
-				'POLL_TIMEOUT', 'PixiService', 'AppService', '$scope',
-		function(POLL_TIMEOUT,   PixiService,   AppService,    $scope) {
+	.controller('AppController', ['POLL_TIMEOUT', 'PixiService', 'AppService', '$scope', function(POLL_TIMEOUT, PixiService, AppService, $scope) {
 
-			var lastTimeStamp = new Date();
+		var lastTimeStamp = new Date();
 
-			$scope.error = function(msg) {
-				$scope.errorMessage = msg;
-			};
+		$scope.error = function(msg) {
+			$scope.errorMessage = msg;
+		};
 
-			$scope.poll = function(){
-				setTimeout(function(){
-					AppService.poll(lastTimeStamp).then(function(response) {
-						lastTimeStamp = response.data.end_time; // end of time range already visualized
-						$scope.template_path = PixiService.publish(response.data.events);
-						setTimeout($scope.poll, POLL_TIMEOUT); // go again
-					}).catch(function(error) {
-						$scope.error(error);
-					});
-				}, POLL_TIMEOUT);
-			};
+		$scope.poll = function(){
+			setTimeout(function(){
+				AppService.poll(lastTimeStamp).then(function(response) {
+					lastTimeStamp = response.data.end_time; // end of time range already visualized
+					$scope.template_path = PixiService.publish(response.data.events);
+					setTimeout($scope.poll, POLL_TIMEOUT); // go again
+				}).catch(function(error) {
+					$scope.error(error);
+				});
+			}, POLL_TIMEOUT);
+		};
 
-			// init function
-			(function(){
-				$scope.poll();
-			})();
-		}
-	]);
+		// init function
+		(function(){
+			$scope.poll();
+		})();
+
+	}]);
