@@ -15668,6 +15668,14 @@ function AppService($http) {
 		return $http.get(`/events/from/${new Date(fromDate).toISOString()}`);
 	};
 
+	service.getEventsSSE = function(fromDate, callback) {
+		var source = new EventSource(`/events/from/${new Date(fromDate).toISOString()}`);
+		source.onmessage = function (event) {
+			console.log(JSON.stringify(event, null, 4));
+			callback(event.data);
+		};
+	};
+
 	// DEBUG
 	service.checkDirect = function(fromDate) {
 		return $http.get(`http://10.128.10.248:8080/events?lastseen=${fromDate}`);
@@ -33294,15 +33302,24 @@ function AppController(PixiService, AppService, $scope) {
 	};
 
 	$scope.poll = function(){
-		setTimeout(function(){
-			AppService.getEvents(lastTimeStamp).then(function(response) {
+		// setTimeout(function(){
+		// 	AppService.getEvents(lastTimeStamp).then(function(response) {
+		// 		lastTimeStamp = response.data.end_time; // end of time range already visualized
+		// 		$scope.template_path = PixiService.publish(response.data.events);
+		// 		setTimeout($scope.poll, POLL_TIMEOUT); // go again
+		// 	}).catch(function(error) {
+		// 		$scope.error(error);
+		// 	});
+		// }, POLL_TIMEOUT);
+
+		AppService.getEventsSSE(lastTimeStamp, function(response) {
+			if (response.ok) {
 				lastTimeStamp = response.data.end_time; // end of time range already visualized
 				$scope.template_path = PixiService.publish(response.data.events);
-				setTimeout($scope.poll, POLL_TIMEOUT); // go again
-			}).catch(function(error) {
-				$scope.error(error);
-			});
-		}, POLL_TIMEOUT);
+			} else {
+				$scope.error(response.error);
+			}
+		});
 	};
 
 	// init function

@@ -9,15 +9,24 @@ function AppController(PixiService, AppService, $scope) {
 	};
 
 	$scope.poll = function(){
-		setTimeout(function(){
-			AppService.getEvents(lastTimeStamp).then(function(response) {
+		// setTimeout(function(){
+		// 	AppService.getEvents(lastTimeStamp).then(function(response) {
+		// 		lastTimeStamp = response.data.end_time; // end of time range already visualized
+		// 		$scope.template_path = PixiService.publish(response.data.events);
+		// 		setTimeout($scope.poll, POLL_TIMEOUT); // go again
+		// 	}).catch(function(error) {
+		// 		$scope.error(error);
+		// 	});
+		// }, POLL_TIMEOUT);
+
+		AppService.getEventsSSE(lastTimeStamp, function(response) {
+			if (response.ok) {
 				lastTimeStamp = response.data.end_time; // end of time range already visualized
 				$scope.template_path = PixiService.publish(response.data.events);
-				setTimeout($scope.poll, POLL_TIMEOUT); // go again
-			}).catch(function(error) {
-				$scope.error(error);
-			});
-		}, POLL_TIMEOUT);
+			} else {
+				$scope.error(response.error);
+			}
+		});
 	};
 
 	// init function
