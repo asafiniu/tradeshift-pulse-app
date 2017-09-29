@@ -1,11 +1,20 @@
-const easing = 0.08; // Size of each step along the path
-const circleSpeed = 0.65;
+
+const easing = require('../utils/easing');
+const easingSpeed = 0.08; // Size of each step along the path
+// const circleSpeed = 0.65;
 const maxVolume = 25;
 
 function dist(x1, y1, x2, y2) {
 	return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
 }
 
+function getSign(number) {
+	if (number > 0) {
+		return 1;
+	} else {
+		return -1;
+	}
+}
 class Connection {
 	constructor({ source, dest, timestamp, color, volume }) {
 		// console.log(JSON.stringify(srcPoint, null, '\t'));
@@ -19,14 +28,19 @@ class Connection {
 		this.line = new PIXI.Graphics();
 		this.srcCircle = new PIXI.Graphics();
 		this.srcCircleTimePos = 0;
-		// this.srcCircle.x = srcPoint.x;
-		// this.srcCircle.y = srcPoint.y;
 		this.dstCircle = new PIXI.Graphics();
 		this.dstCircleTimePos = 0;
-		// this.dstCircle.x = dstPoint.x;
-		// this.dstCircle.y = dstPoint.y;
 		this.onStage = false;
 		this.volume = volume;
+		const period = Number(1.5 * 60);
+		this.movementUnit = {
+			x: Number(this.dstPoint.x - this.srcPoint.x) / period,
+			y: Number(this.dstPoint.y - this.srcPoint.y) / period,
+		}
+		// this.movementNormal = {
+		// 	x: Number(this.dstPoint.x - this.srcPoint.x) / period,
+		// 	y: Number(this.dstPoint.y - this.srcPoint.y) / period,
+		// }
 	}
 
 	isOlderThan(timestamp) {
@@ -62,13 +76,26 @@ class Connection {
 	processLine() {
 		this.line.clear();
 		this.line.lineStyle(3, this.color, 1); 
-		this.line.moveTo(this.currentPoint.x, this.currentPoint.y); 
-		this.currentPoint.x += (this.dstPoint.x - this.currentPoint.x) * easing;
-		this.currentPoint.y += (this.dstPoint.y - this.currentPoint.y) * easing;
+		this.line.moveTo(this.currentPoint.x, this.currentPoint.y);
+		this.currentPoint.x += (this.dstPoint.x - this.currentPoint.x) * easingSpeed;
+		this.currentPoint.y += (this.dstPoint.y - this.currentPoint.y) * easingSpeed;
 		this.line.lineTo(this.currentPoint.x, this.currentPoint.y);
 	}
 
-	processCircle({ circle, timePos, point }) {
+	// processLine() {
+	// 	this.line.clear();
+	// 	this.line.lineStyle(3, this.color, 1); 
+	// 	this.line.moveTo(this.currentPoint.x, this.currentPoint.y);
+	// 	this.currentPoint.x += this.movementUnit.x;
+	// 	this.currentPoint.y += this.movementUnit.y;
+	// 	const targetPoint = {
+	// 		x: this.currentPoint.x + (this.movementUnit.x * 10),
+	// 		y: this.currentPoint.y + (this.movementUnit.y * 10),
+	// 	};
+	// 	this.line.lineTo(targetPoint.x, targetPoint.y);
+	// }
+
+	processCircle({ circle, timePos, point, circleSpeed }) {
 		let newTimePos = timePos;
 		newTimePos += circleSpeed;
 		let circleSize;
@@ -93,17 +120,23 @@ class Connection {
 			circle: this.srcCircle,
 			timePos: this.srcCircleTimePos,
 			point: this.srcPoint,
+			circleSpeed: 0.65,
 		});
-
+		this.dstCircleTimePos = this.processCircle({
+			circle: this.dstCircle,
+			timePos: this.dstCircleTimePos,
+			point: this.dstPoint,
+			circleSpeed: 0.65,
+		});
 		if (this.distance > 1.0) {
 			this.processLine();
-		} else {
-			this.dstCircleTimePos = this.processCircle({
-				circle: this.dstCircle,
-				timePos: this.dstCircleTimePos,
-				point: this.dstPoint,
-			});
-		}
+		} //else {
+		// 	this.dstCircleTimePos = this.processCircle({
+		// 		circle: this.dstCircle,
+		// 		timePos: this.dstCircleTimePos,
+		// 		point: this.dstPoint,
+		// 	});
+		// }
 	}
 
 	isComplete() {

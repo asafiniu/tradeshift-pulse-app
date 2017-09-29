@@ -290,9 +290,9 @@ function PixiService() {
 
 	// addMockEvents();
 
-	setInterval(() => {
-		addMockEvents();
-	}, 5000);
+	// setInterval(() => {
+	// 	addMockEvents();
+	// }, 5000);
 
 	return service;
 }
