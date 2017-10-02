@@ -21,5 +21,8 @@
     "ng-inject": "^1.0.0",
     "request": "^2.83.0",
     "webpack": "^3.6.0"
+  },
+  "dependencies": {
+    "victor": "^1.1.0"
   }
 }

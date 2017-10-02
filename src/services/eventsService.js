@@ -1,4 +1,6 @@
-function AppService($http) {
+'use strict';
+
+function EventsService($http) {
 	const service = {};
 
 	/*
@@ -14,4 +16,7 @@ function AppService($http) {
 	return service;
 }
 
-module.exports = ['$http', AppService];
+module.exports = [
+	'$http', 
+	EventsService,
+];

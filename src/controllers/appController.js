@@ -1,6 +1,8 @@
+'use strict';
+
 const POLL_TIMEOUT = 1000;
 
-function AppController(PixiService, AppService, OdometerService, $scope) {
+function AppController(EventsService, MockEventsService, OdometerService, MapService, $scope) {
 
 	var lastTimeStamp = new Date();
 
@@ -15,7 +17,7 @@ function AppController(PixiService, AppService, OdometerService, $scope) {
 
 	var now = new Date();
 	$scope.currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-	AppService.getEventsSSE(lastTimeStamp, function(data) {
+	EventsService.getEventsSSE(lastTimeStamp, function(data) {
 		var jsonData = {};
 		var error = '';
 		try {
@@ -26,11 +28,24 @@ function AppController(PixiService, AppService, OdometerService, $scope) {
 
 		if (jsonData && jsonData.volume) {
 			OdometerService.addVolume(jsonData.volume);
-			PixiService.publish([jsonData]);
+			MapService.publish([jsonData]);
 		} else {
 			$scope.error(error);
 		}
 	});
+	// MockEventsService.startEventStream((events) => {
+	// 	events.forEach((event) => {
+	// 		OdometerService.addVolume(event.volume);
+	// 		MapService.publish([event]);
+	// 	});
+	// });
 }
 
-module.exports = ['PixiService', 'AppService', 'OdometerService', '$scope', AppController];
+module.exports = [
+	'EventsService',	
+	'MockEventsService',
+	'OdometerService',
+	'MapService',
+	'$scope',
+	AppController,
+];

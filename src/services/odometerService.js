@@ -3,14 +3,25 @@
 const _ = require('lodash');
 
 function OdometerService() {
-	const service = {};
-
-	var currentVolume = 0;
-	var rate = 173;
+	let currentVolume = 0;
+	const rate = 173;
 	window.odometer = document.getElementById('odometer');
 
+	const service = {};
+
+	service.addVolume = (volume) => {
+		volume *= rate; // awesome, awesomer, awesomest
+		const prev = currentVolume;
+		currentVolume += volume;
+		_.each(_.range(1, volume), function(i) {
+			setTimeout(function(){
+				window.odometer.innerHTML = commafy(prev + i);
+			}, 400);
+		});
+	}
+
 	function commafy(num) {
-		var str = num.toString().split('.');
+		const str = num.toString().split('.');
 		if (str[0].length >= 4) {
 			str[0] = str[0].replace(/(\d)(?=(\d{3})+$)/g, '$1,');
 		}
@@ -19,17 +30,6 @@ function OdometerService() {
 		}
 
 		return str.join('.');
-	}
-
-	service.addVolume = function(volume) {
-		volume *= rate; // awesome, awesomer, awesomest
-		var prev = currentVolume;
-		currentVolume += volume;
-		_.each(_.range(1, volume), function(i) {
-			setTimeout(function(){
-				window.odometer.innerHTML = commafy(prev + i);
-			}, 400);
-		});
 	}
 
 	return service;
