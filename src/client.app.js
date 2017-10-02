@@ -1,5 +1,7 @@
 'use strict';
 
+const angular = require('angular');
+
 angular.module('TradeshiftPulseApp', [])
 	.service('ConstantsService', require('./services/constantsService'))
 	.service('EventsService', require('./services/eventsService'))

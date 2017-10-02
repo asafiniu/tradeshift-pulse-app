@@ -1,6 +1,7 @@
 'use strict';
 
 const Victor = require('Victor');
+const PIXI = require('pixi.js');
 
 function ConnectionModel(EasingUtil) {
 	const easingSpeed = 0.08; // Size of each step along the path

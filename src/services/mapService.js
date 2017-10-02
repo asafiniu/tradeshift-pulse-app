@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const moment = require('moment');
+const PIXI = require('pixi.js');
 
 function MapService(ConnectionModel, ConstantsService, NumberUtil, KeyboardUtil) {
 	const MAP_WIDTH = ConstantsService.MAP_WIDTH;
